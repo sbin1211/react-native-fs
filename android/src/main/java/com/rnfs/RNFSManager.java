@@ -192,7 +192,7 @@ private void resolveContentWithEncoding(byte[] bytes, String encoding, Promise p
   }
 
   @ReactMethod
-  public void appendFile(String filepath, String content, String encoding,, Promise promise) {
+  public void appendFile(String filepath, String content, String encoding, Promise promise) {
     try {
      byte[] bytes = this.getDataWithEncoding(content, encoding);
 

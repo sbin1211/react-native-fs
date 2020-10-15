@@ -291,7 +291,7 @@ RCT_EXPORT_METHOD(readFile:(NSString *)filepath
   [self resolveContentWithEncoding:content withEncoding: encoding resolver: resolve rejecter: reject];
 }
 
-(void) resolveContentWithEncoding: (NSData *)content
+-(void) resolveContentWithEncoding: (NSData *)content
                        withEncoding: (NSString *)encoding
                            resolver: (RCTPromiseResolveBlock)resolve
                            rejecter:(RCTPromiseRejectBlock)reject {
