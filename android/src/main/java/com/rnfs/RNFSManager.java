@@ -32,8 +32,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.io.RandomAccessFile;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -149,10 +151,34 @@ public class RNFSManager extends ReactContextBaseJavaModule {
     return bytesResult;
   }
 
+private void resolveContentWithEncoding(byte[] bytes, String encoding, Promise promise) {
+    if (encoding.equals("base64")) {
+      promise.resolve(Base64.encodeToString(bytes, Base64.NO_WRAP));
+    } else if (encoding.equals("utf8")) {
+      promise.resolve(new String(bytes, Charset.forName("UTF-8")));
+    } else if (encoding.equals("ascii")) {
+      promise.resolve(new String(bytes, Charset.forName("US-ASCII")));
+    } else {
+      promise.reject("ENCERR", "ENCERR: illegal encoding, use base64, utf8 or ascii");
+    }
+  }
+
+  private byte[] getDataWithEncoding(String content, String encoding) throws UnsupportedEncodingException {
+    if (encoding.equals("base64")) {
+      return Base64.decode(content, Base64.DEFAULT);
+    } else if (encoding.equals("utf8")) {
+      return content.getBytes(Charset.forName("UTF-8"));
+    } else if (encoding.equals("ascii")) {
+      return content.getBytes(Charset.forName("US-ASCII"));
+    } else {
+      return null;
+    }
+  }
+
   @ReactMethod
-  public void writeFile(String filepath, String base64Content, ReadableMap options, Promise promise) {
+  public void writeFile(String filepath, String content, String encoding, ReadableMap options, Promise promise) {
     try {
-      byte[] bytes = Base64.decode(base64Content, Base64.DEFAULT);
+      byte[] bytes =this.getDataWithEncoding(content, encoding);
 
       OutputStream outputStream = getOutputStream(filepath, false);
       outputStream.write(bytes);
@@ -166,9 +192,9 @@ public class RNFSManager extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void appendFile(String filepath, String base64Content, Promise promise) {
+  public void appendFile(String filepath, String content, String encoding,, Promise promise) {
     try {
-      byte[] bytes = Base64.decode(base64Content, Base64.DEFAULT);
+     byte[] bytes = this.getDataWithEncoding(content, encoding);
 
       OutputStream outputStream = getOutputStream(filepath, true);
       outputStream.write(bytes);
@@ -184,7 +210,7 @@ public class RNFSManager extends ReactContextBaseJavaModule {
   @ReactMethod
   public void write(String filepath, String base64Content, int position, Promise promise) {
     try {
-      byte[] bytes = Base64.decode(base64Content, Base64.DEFAULT);
+     byte[] bytes = this.getDataWithEncoding(content, encoding);
 
       if (position < 0) {
         OutputStream outputStream = getOutputStream(filepath, true);
@@ -216,7 +242,7 @@ public class RNFSManager extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void readFile(String filepath, Promise promise) {
+  public void readFile(String filepath, String encoding, Promise promise) {
     try {
       InputStream inputStream = getInputStream(filepath);
       byte[] inputData = getInputStreamBytes(inputStream);
@@ -237,9 +263,7 @@ public class RNFSManager extends ReactContextBaseJavaModule {
       inputStream.skip(position);
       int bytesRead = inputStream.read(buffer, 0, length);
 
-      String base64Content = Base64.encodeToString(buffer, 0, bytesRead, Base64.NO_WRAP);
-
-      promise.resolve(base64Content);
+     this.resolveContentWithEncoding(buffer, encoding, promise);
     } catch (Exception ex) {
       ex.printStackTrace();
       reject(promise, filepath, ex);
@@ -247,7 +271,7 @@ public class RNFSManager extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void readFileAssets(String filepath, Promise promise) {
+  public void readFileAssets(String filepath,String encoding, Promise promise) {
     InputStream stream = null;
     try {
       // ensure isn't a directory
@@ -260,8 +284,7 @@ public class RNFSManager extends ReactContextBaseJavaModule {
 
       byte[] buffer = new byte[stream.available()];
       stream.read(buffer);
-      String base64Content = Base64.encodeToString(buffer, Base64.NO_WRAP);
-      promise.resolve(base64Content);
+     this.resolveContentWithEncoding(buffer, encoding, promise);
     } catch (Exception ex) {
       ex.printStackTrace();
       reject(promise, filepath, ex);
@@ -276,7 +299,7 @@ public class RNFSManager extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void readFileRes(String filename, Promise promise) {
+  public void readFileRes(String filename, String encoding, Promise promise) {
     InputStream stream = null;
     try {
       int res = getResIdentifier(filename);
@@ -288,8 +311,7 @@ public class RNFSManager extends ReactContextBaseJavaModule {
 
       byte[] buffer = new byte[stream.available()];
       stream.read(buffer);
-      String base64Content = Base64.encodeToString(buffer, Base64.NO_WRAP);
-      promise.resolve(base64Content);
+      this.resolveContentWithEncoding(buffer, encoding, promise);
     } catch (Exception ex) {
       ex.printStackTrace();
       reject(promise, filename, ex);

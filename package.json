@@ -1,6 +1,6 @@
 {
   "name": "react-native-fs",
-  "version": "2.16.6",
+  "version": "4.0.0",
   "description": "Native filesystem access for react-native",
   "main": "FS.common.js",
   "typings": "index.d.ts",
@@ -26,8 +26,6 @@
   "author": "Johannes Lumpe <johannes@lum.pe> (https://github.com/johanneslumpe)",
   "license": "MIT",
   "dependencies": {
-    "base-64": "^0.1.0",
-    "utf8": "^3.0.0"
   },
   "devDependencies": {
     "create-react-class": "15.6.3",
