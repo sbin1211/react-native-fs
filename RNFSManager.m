@@ -117,7 +117,9 @@ RCT_EXPORT_METHOD(writeFile:(NSString *)filepath
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
+
   NSData *data = [self dataFromContentWithEncoding:content withEncoding:encoding];
+
   NSMutableDictionary *attributes = [[NSMutableDictionary alloc] init];
 
   if ([options objectForKey:@"NSFileProtectionKey"]) {
@@ -140,6 +142,7 @@ RCT_EXPORT_METHOD(appendFile:(NSString *)filepath
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
   NSData *data = [self dataFromContentWithEncoding:content withEncoding:encoding];
+
   NSFileManager *fM = [NSFileManager defaultManager];
 
   if (![fM fileExistsAtPath:filepath])
@@ -180,6 +183,7 @@ RCT_EXPORT_METHOD(write:(NSString *)filepath
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
   NSData *data = [self dataFromContentWithEncoding:content withEncoding:encoding];
+
   NSFileManager *fM = [NSFileManager defaultManager];
 
   if (![fM fileExistsAtPath:filepath])
@@ -264,10 +268,7 @@ RCT_EXPORT_METHOD(mkdir:(NSString *)filepath
   resolve(nil);
 }
 
-RCT_EXPORT_METHOD(readFile:(NSString *)filepath
-                  withEncoding:(NSString *)encoding
-                  resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(readFile:(NSString *)filepath withEncoding:(NSString *)encoding resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
   BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:filepath];
 
@@ -289,9 +290,10 @@ RCT_EXPORT_METHOD(readFile:(NSString *)filepath
 
   NSData *content = [[NSFileManager defaultManager] contentsAtPath:filepath];
   [self resolveContentWithEncoding:content withEncoding: encoding resolver: resolve rejecter: reject];
+
 }
 
--(void) resolveContentWithEncoding: (NSData *)content
+- (void) resolveContentWithEncoding: (NSData *)content
                        withEncoding: (NSString *)encoding
                            resolver: (RCTPromiseResolveBlock)resolve
                            rejecter:(RCTPromiseRejectBlock)reject {
@@ -362,8 +364,10 @@ RCT_EXPORT_METHOD(read:(NSString *)filepath
         content = [file readDataToEndOfFile];
     }
 
-   [self resolveContentWithEncoding:content withEncoding:encoding resolver:resolve rejecter:reject];
+    [self resolveContentWithEncoding:content withEncoding:encoding resolver:resolve rejecter:reject];
 }
+
+
 
 RCT_EXPORT_METHOD(hash:(NSString *)filepath
                   algorithm:(NSString *)algorithm
@@ -990,9 +994,6 @@ RCT_EXPORT_METHOD(touch:(NSString*)filepath
            @"RNFSMainBundlePath": [[NSBundle mainBundle] bundlePath],
            @"RNFSCachesDirectoryPath": [self getPathForDirectory:NSCachesDirectory],
            @"RNFSDocumentDirectoryPath": [self getPathForDirectory:NSDocumentDirectory],
-           @"RNFSApplicationSupportDirectoryPath": [self getPathForDirectory:NSApplicationSupportDirectory],
-           // Per Apple's docs, all app content in Application Support must be within a subdirectory of the app's bundle identifier
-           @"RNFSApplicationSupportDirectoryBundlePath": [[self getPathForDirectory:NSApplicationSupportDirectory] stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]],
            @"RNFSExternalDirectoryPath": [NSNull null],
            @"RNFSExternalStorageDirectoryPath": [NSNull null],
            @"RNFSTemporaryDirectoryPath": NSTemporaryDirectory(),
@@ -1002,7 +1003,11 @@ RCT_EXPORT_METHOD(touch:(NSString*)filepath
            @"RNFSFileProtectionComplete": NSFileProtectionComplete,
            @"RNFSFileProtectionCompleteUnlessOpen": NSFileProtectionCompleteUnlessOpen,
            @"RNFSFileProtectionCompleteUntilFirstUserAuthentication": NSFileProtectionCompleteUntilFirstUserAuthentication,
-           @"RNFSFileProtectionNone": NSFileProtectionNone
+           @"RNFSFileProtectionNone": NSFileProtectionNone,
+           @"RNFSApplicationSupportDirectoryPath": [self getPathForDirectory:NSApplicationSupportDirectory],
+           // Per Apple's docs, all app content in Application Support must be within a subdirectory of the app's bundle identifier
+            @"RNFSApplicationSupportDirectoryBundlePath": [[self getPathForDirectory:NSApplicationSupportDirectory] stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]],
+           
           };
 }
 
